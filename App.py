@@ -16,7 +16,7 @@ image = (
 app = modal.App("voice-cloning-server", image=image)
 
 @app.function(
-    gpu="T4",
+    gpu=modal.gpu.t4),
     timeout=600,
     container_idle_timeout=120
 )
