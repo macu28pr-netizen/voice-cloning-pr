@@ -51,4 +51,4 @@ def run_gradio():
         ],
         outputs=gr.Audio(label="Voz Clonada"),
         title="Clonación de Voz en Modal",
-        description="Sube un"
+        description="Sube un")
