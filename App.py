@@ -8,17 +8,18 @@ image = (
         "gradio==4.44.0",
         "torch==2.1.2",
         "torchaudio==2.1.2",
-        "transformers==4.36.2"
+        "transformers==4.36.2",
     )
     .env({"COQUI_TOS_AGREED": "1"})
 )
 
-app = modal.App("voice-cloning-server", image=image)
+app = modal.App("voice-cloning-server")
+
 
 @app.function(
-    gpu=modal.gpu.t4),
+    gpu=modal.gpu.T4(),
     timeout=600,
-    container_idle_timeout=120
+    container_idle_timeout=120,
 )
 @modal.web_server(7860, startup_timeout=300)
 def run_gradio():
@@ -32,23 +33,30 @@ def run_gradio():
     def clonar_voz(texto, audio_referencia, idioma):
         if not texto or audio_referencia is None:
             return None
-        
+
         archivo_salida = "/tmp/voz_clonada.wav"
         tts.tts_to_file(
             text=texto,
             speaker_wav=audio_referencia,
             language=idioma,
-            file_path=archivo_salida
+            file_path=archivo_salida,
         )
         return archivo_salida
 
     interfaz = gr.Interface(
         fn=clonar_voz,
         inputs=[
-            gr.Textbox(label="Texto a convertir en voz", placeholder="Escribe aquí..."),
+            gr.Textbox(
+                label="Texto a convertir en voz",
+                placeholder="Escribe aquí...",
+            ),
             gr.Audio(type="filepath", label="Muestra de voz limpia"),
-            gr.Dropdown(choices=["es", "en"], value="es", label="Idioma")
+            gr.Dropdown(choices=["es", "en"], value="es", label="Idioma"),
         ],
         outputs=gr.Audio(label="Voz Clonada"),
         title="Clonación de Voz en Modal",
-        description="Sube un")
+        description="Sube un archivo de voz y escribe el texto.",
+    )
+
+    gr.close_all()
+    interfaz.queue().launch(server_name="0.0.0.0", server_port=7860)
