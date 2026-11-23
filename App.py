@@ -19,7 +19,7 @@ app = modal.App("voice-cloning-server")
 @app.function(
     gpu="T4",
     timeout=600,
-    container_idle_timeout=120,
+    scaledown_window=120,
 )
 @modal.web_server(7860, startup_timeout=300)
 def run_gradio():
